@@ -76,8 +76,8 @@ jobs:
         echo "wef_ip=$(terraform output wef_public_ip | sed 's/"//g')" >> $GITHUB_OUTPUT
         echo "win10_ip=$(terraform output win10_public_ip | sed 's/"//g')" >> $GITHUB_OUTPUT
         
-    - name: install PyWinRM for ansible
-      run: pip install pywinrm
+    - name: Install PyWinRM for ansible
+      run: pipx inject ansible-core pywinrm
 
     - name: Wait a bit - Let cloudinit do the thing
       run: sleep 30
@@ -88,22 +88,22 @@ jobs:
         playbook: detectionlab.yml
         directory: ./AWS/Terraform_Ansible/ansible
         inventory: |
-          [ssh]
+          [linux]
           logger ansible_host=${{ steps.output_ips.outputs.logger_ip }}
 
-          [ssh:vars]
+          [linux:vars]
           ansible_user=vagrant
           ansible_password=vagrant
           ansible_port=22
           ansible_connection=ssh
           ansible_ssh_extra_args="-o StrictHostKeyChecking=no"
 
-          [win]
+          [windows]
           dc ansible_host=${{ steps.output_ips.outputs.dc_ip }}
           wef ansible_host=${{ steps.output_ips.outputs.wef_ip }}
           win10 ansible_host=${{ steps.output_ips.outputs.win10_ip }}
 
-          [win:vars]
+          [windows:vars]
           ansible_user=vagrant
           ansible_password=vagrant
           ansible_port=5985
